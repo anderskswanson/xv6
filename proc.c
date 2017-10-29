@@ -48,6 +48,7 @@ static int addToStateListEnd(struct proc ** sList, struct proc * p);
 static int addToStateListHead(struct proc ** sList, struct proc * p);
 static void exitSearch(struct proc * sList);
 static int waitSearch(struct proc * sList);
+//static int killSearch(struct proc * sList, int pid);
 static void ctrlprint(struct proc * sList);
 #endif
 void
@@ -444,6 +445,7 @@ wait(void)
         // Found one.
         if(removeFromStateList(&ptable.pLists.zombie, p) == 0)
             panic("wait zombie");
+        assertState(p, ZOMBIE);
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
@@ -453,7 +455,6 @@ wait(void)
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
-        assertState(p, ZOMBIE);
         if(addToStateListHead(&ptable.pLists.free, p) == 0)
             panic("wait free");        
         release(&ptable.lock);
@@ -1063,6 +1064,28 @@ waitSearch(struct proc * sList)
     
 }
 
+/*static int 
+killSearch(struct proc * sList, int pid)
+{
+    struct proc * current;
+
+    if(sList)
+    {
+        current = sList;
+        while(current)
+        {
+            if(current->pid == pid)
+            {
+                current->killed = 1;
+                return 0;
+            }
+            current = current->next;
+        }
+    }
+
+    return -1;
+}*/
+
 static void 
 ctrlprint(struct proc * sList)
 {
@@ -1113,7 +1136,7 @@ void
 printzombie(void)
 {
     struct proc * current = ptable.pLists.zombie;
-    int ppid;
+    uint ppid;
 
     cprintf("Zombie List:\n");
     if(!current)
@@ -1123,8 +1146,10 @@ printzombie(void)
     {
         if(current->pid == 1)
             ppid = 1;
-        else
+        else if(current->parent)
             ppid = current->parent->pid;
+        else
+            ppid = 0;
 
         cprintf("(%d, %d)", current->pid, ppid);
 
