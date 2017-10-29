@@ -4,7 +4,8 @@
 #include "user.h"
 #include "date.h"
 
-int testuidgid(void)
+int 
+testuidgid(void)
 {
     uint uid;
     uint gid;

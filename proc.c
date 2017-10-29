@@ -554,6 +554,8 @@ scheduler(void)
     if(p)
     {
       assertState(p, RUNNABLE);
+
+//      cprintf("Process entering CPU: %d\n", p->pid);
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -573,6 +575,7 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       proc = 0;
+
     }
     release(&ptable.lock);
     // if idle, wait for next interrupt
@@ -741,7 +744,7 @@ wakeup1(void *chan)
               panic("Failed Wakeup Remove From Sleep");
           assertState(found, SLEEPING);
           found->state = RUNNABLE;
-          if(addToStateListHead(&ptable.pLists.ready, found) == 0)
+          if(addToStateListEnd(&ptable.pLists.ready, found) == 0)
               panic("Failed Wakupe Add To Ready");
       }
       else
@@ -792,6 +795,30 @@ kill(int pid)
 
   //check ready
   p = ptable.pLists.ready;
+  while(p)
+  {
+      if(p->pid == pid)
+      {          
+          p->killed = 1;
+          release(&ptable.lock);
+          return 0;
+      }
+      p = p->next;
+  }
+
+  p = ptable.pLists.running;
+  while(p)
+  {
+      if(p->pid == pid)
+      {          
+          p->killed = 1;
+          release(&ptable.lock);
+          return 0;
+      }
+      p = p->next;
+  }
+  
+  p = ptable.pLists.embryo;
   while(p)
   {
       if(p->pid == pid)
