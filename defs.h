@@ -122,10 +122,13 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 #ifdef CS333_P2
-int getprocdata(uint, struct uproc*); //populate uproc table with proc data
+int             getprocdata(uint, struct uproc*); //populate uproc table with proc data
 #endif
 #ifdef CS333_P3P4
-void            test(void);
+void            printsleep(void);
+void            printfree(void);
+void            printzombie(void);
+void            printready(void);
 #endif
 // swtch.S
 void            swtch(struct context**, struct context*);

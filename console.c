@@ -189,15 +189,27 @@ consoleintr(int (*getc)(void))
 {
   int c, doprocdump = 0;
 #ifdef CS333_P3P4
-  int ctrls = 0;
+  int ctrls = 0; 
+  int ctrlr = 0; 
+  int ctrlf = 0;
+  int ctrlz = 0;
 #endif
 
   acquire(&cons.lock);
   while((c = getc()) >= 0){
     switch(c){
 #ifdef CS333_P3P4
+    case C('R'):
+      ctrlr = 1;
+      break;
+    case C('F'):
+      ctrlf = 1;
+      break;
     case C('S'):
       ctrls = 1;
+      break;
+    case C('Z'):
+      ctrlz = 1;
       break;
 #endif
     case C('P'):  // Process listing.
@@ -232,7 +244,13 @@ consoleintr(int (*getc)(void))
   release(&cons.lock);
 #ifdef CS333_P3P4
   if(ctrls)
-    test();  
+    printsleep();  
+  if(ctrlr)
+    printready();
+  if(ctrlz)
+    printzombie();
+  if(ctrlf)
+    printfree();
 #endif
   if(doprocdump) {
     procdump();  // now call procdump() wo. cons.lock held
