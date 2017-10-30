@@ -48,7 +48,6 @@ static int addToStateListEnd(struct proc ** sList, struct proc * p);
 static int addToStateListHead(struct proc ** sList, struct proc * p);
 static void exitSearch(struct proc * sList);
 static int waitSearch(struct proc * sList);
-//static int killSearch(struct proc * sList, int pid);
 static void ctrlprint(struct proc * sList);
 #endif
 void
@@ -991,7 +990,7 @@ removeFromStateList(struct proc ** sList, struct proc * p)
 
     current = *sList;
     //search list for p
-    while(current->next && (p->pid != current->pid)) 
+    while(current->next && (p != current)) 
     {
         prev = current;
         current = current->next;
@@ -1026,6 +1025,7 @@ addToStateListEnd(struct proc ** sList, struct proc * p)
     if(!p)
         return 0;
 
+    p->next = 0;
     if(!(*sList))
         *sList = p;
     else
@@ -1036,7 +1036,6 @@ addToStateListEnd(struct proc ** sList, struct proc * p)
 
         current->next = p;
     }
-        p->next = 0;
     
     return -1;
 }
@@ -1090,28 +1089,6 @@ waitSearch(struct proc * sList)
     return 0;
     
 }
-
-/*static int 
-killSearch(struct proc * sList, int pid)
-{
-    struct proc * current;
-
-    if(sList)
-    {
-        current = sList;
-        while(current)
-        {
-            if(current->pid == pid)
-            {
-                current->killed = 1;
-                return 0;
-            }
-            current = current->next;
-        }
-    }
-
-    return -1;
-}*/
 
 static void 
 ctrlprint(struct proc * sList)

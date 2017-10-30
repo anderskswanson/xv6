@@ -43,6 +43,8 @@ int getprocs(uint max, struct uproc * table); //populate uproc table with proc d
 #endif
 #ifdef CS333_P3P4
 int deathtest(void);
+int sleeptest(void);
+int killtest(void);
 #endif
 // ulib.c
 int stat(char*, struct stat*);

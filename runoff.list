@@ -92,4 +92,4 @@ testuidgid.c
 uproc.h
 testps.c
 deathtest.c
-
+killtest.c

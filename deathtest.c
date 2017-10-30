@@ -5,32 +5,17 @@
 int 
 deathtest(void)
 {
+    int pid = fork();
 
-    int pid;
-    int pids[64];
-    int kids = 0;
-    pid = fork();
-
-    while(pid > 0)
-    {
-        pids[kids] = pid;
-        pid = fork();
-
-        if(pid < 0)
-        {
-            printf(2,"num kids: %d\n", kids);
-            sleep(3000);
-        }
-//        if(pid == 0)
-  //          while(1) {}
-        ++kids;
-    }
-    
     if(pid > 0)
     {
-        for(int i = 0; i < 64; ++i)
-            kill(pids[i]);
+        printf(2,"ENTERING PARENT\n");
+        sleep(2000);
     }
+    if(pid == 0)
+        exit();
+    if(pid < 0)
+        printf(2, "FORKERROR\n");
 
 
     exit();
