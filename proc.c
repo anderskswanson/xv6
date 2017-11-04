@@ -789,7 +789,6 @@ int
 kill(int pid)
 {
   struct proc *p;
-
   acquire(&ptable.lock);
 
   //check ready

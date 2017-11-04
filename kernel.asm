@@ -10626,7 +10626,6 @@ kill(int pid)
 801054e9:	89 e5                	mov    %esp,%ebp
 801054eb:	83 ec 18             	sub    $0x18,%esp
   struct proc *p;
-
   acquire(&ptable.lock);
 801054ee:	83 ec 0c             	sub    $0xc,%esp
 801054f1:	68 80 39 11 80       	push   $0x80113980
@@ -10663,7 +10662,7 @@ kill(int pid)
 80105539:	8b 45 f4             	mov    -0xc(%ebp),%eax
 8010553c:	8b 80 90 00 00 00    	mov    0x90(%eax),%eax
 80105542:	89 45 f4             	mov    %eax,-0xc(%ebp)
-
+  struct proc *p;
   acquire(&ptable.lock);
 
   //check ready
