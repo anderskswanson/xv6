@@ -17,10 +17,18 @@ main(void)
   uprocsize = getprocs(max, utable);
   if(uprocsize >= 0)
   {
+#ifdef CS333_P3P4
+      printf(2, "PID\tName\tUID\tGID\tPPID\tPrio\tElapsed\tCPU\tState\tSize\n");
+#else
       printf(2, "PID\tName\tUID\tGID\tPPID\tElapsed\tCPU\tState\tSize\n");
+#endif
       for(int i = 0; i < uprocsize; ++i)
       {
+#ifdef CS333_P3P4
+          printf(2, "%d\t%s\t%d\t%d\t%d\t%d\t", utable[i].pid, utable[i].name, utable[i].uid, utable[i].gid, utable[i].ppid, utable[i].priority);
+#else
           printf(2, "%d\t%s\t%d\t%d\t%d\t", utable[i].pid, utable[i].name, utable[i].uid, utable[i].gid, utable[i].ppid);
+#endif
           tickasfloat(utable[i].elapsed_ticks);
           tickasfloat(utable[i].CPU_total_ticks);
           printf(2, "%s\t%d\n", utable[i].state, utable[i].size);

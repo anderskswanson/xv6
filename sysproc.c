@@ -159,6 +159,28 @@ sys_getprocs(void)
 }
 #endif
 
+#ifdef CS333_P3P4
+int
+sys_setpriority(void)
+{
+    int pid, priority;
+
+    if(argint(0, &pid) < 0)        
+        return -1;
+    if(argint(1, &priority) < 0)
+        return -1;
+
+    if(priority < 0 || priority > MAX)
+        return -1;
+    if(pid < 1)
+        return -1;
+
+    proc->priority = priority;
+
+    return 0;
+}
+#endif
+
 // return how many clock tick interrupts have occurred
 // since start. 
 int

@@ -45,6 +45,7 @@ int getprocs(uint max, struct uproc * table); //populate uproc table with proc d
 int deathtest(void);
 int sleeptest(void);
 int killtest(void);
+int setpriority(int pid, int priority);
 #endif
 // ulib.c
 int stat(char*, struct stat*);

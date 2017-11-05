@@ -94,3 +94,6 @@ testps.c
 deathtest.c
 killtest.c
 sleeptest.c
+testsetpriority.c
+prioritytest.c
+testSched.c
