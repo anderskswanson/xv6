@@ -165,14 +165,14 @@ sys_setpriority(void)
 {
     int pid, priority;
 
-    if(argint(0, &pid) < 0)        
+    if(argint(0, &pid) < 0) 
         return -1;
     if(argint(1, &priority) < 0)
         return -1;
 
-    if(priority < 0 || priority > MAX)
+    if(priority < 0 || priority > MAX) //valid prio
         return -1;
-    if(pid < 1)
+    if(pid < 1) //valid pid
         return -1;
 
     proc->priority = priority;

@@ -52,6 +52,7 @@ static void exitSearch(struct proc * sList);
 static int waitSearch(struct proc * sList);
 static void ctrlprint(struct proc * sList);
 static int checkForDemotion(struct proc *);
+static void bumpPriority(struct proc * sList);
 #endif
 void
 pinit(void)
@@ -235,8 +236,6 @@ fork(void)
   // Copy process state from p.
   if((np->pgdir = copyuvm(proc->pgdir, proc->sz)) == 0){
     kfree(np->kstack);
-    np->kstack = 0;
-    np->state = UNUSED;
 #ifdef CS333_P3P4
     acquire(&ptable.lock); 
     //give to free : handle return value?
@@ -247,6 +246,8 @@ fork(void)
         panic("Failed add to free in fork");
     release(&ptable.lock);
 #endif
+    np->kstack = 0;
+    np->state = UNUSED;
     return -1;
   }
   np->sz = proc->sz;
@@ -570,6 +571,8 @@ scheduler(void)
     //if it's time to promote, move up in queue
     if(ticks >= ptable.PromoteAtTime)
     {
+
+//        printready();
         for(int i = 1; i <= MAX; ++i)
         {
             curr = ptable.pLists.ready[i];
@@ -580,12 +583,20 @@ scheduler(void)
                 if(removeFromStateList(&ptable.pLists.ready[i], found) == 0)
                     panic("FAILED PROMOTE REMOVE SCHEDULER");
                 assertState(found, RUNNABLE);
+                
+//              cprintf("BUMPING PRIORITY IN SCHEDLER\n");
+
                 found->priority = found->priority - 1;
                 found->budget = BUDGET_NEW;
+                
                 if(addToStateListEnd(&ptable.pLists.ready[i - 1], found) == 0)
                     panic("FAILED PROMOTE ADD SCHEDULER");
             }
         }
+
+//        printready();
+        bumpPriority(ptable.pLists.sleep);
+        bumpPriority(ptable.pLists.running);
 
         ptable.PromoteAtTime = ticks + TIME_TO_PROMOTE;
     }
@@ -601,7 +612,7 @@ scheduler(void)
     {
       assertState(p, RUNNABLE);
 
-//      cprintf("Process entering CPU: %d\n", p->pid);
+      //cprintf("Process entering CPU: %d\n", p->pid);
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -1231,14 +1242,27 @@ printzombie(void)
 void
 printready(void)
 {
-    cprintf("Ready List Processes:\n");
+    struct proc * current;
+
+    cprintf("Ready Lists\n");
+
     for(int i = 0; i <= MAX; ++i) 
     {
-        ctrlprint(ptable.pLists.ready[i]);
+        cprintf("%d: ", i);
+        current = ptable.pLists.ready[i];
+        while(current)
+        {
+            cprintf("(%d, %d)", current->pid, current->budget);
+            if(current->next)
+                cprintf(" -> ");
+            current = current->next;
+        }
+        cprintf("\n");
     }
 }
 
-int checkForDemotion(struct proc * p)
+int 
+checkForDemotion(struct proc * p)
 {
     if(!p) return 0;        
 
@@ -1246,25 +1270,42 @@ int checkForDemotion(struct proc * p)
     proc->budget = proc->budget - (ticks - proc->cpu_ticks_in);
     if(proc->budget <= 0)
     {
+        procdump();
+        cprintf("DEMOTION TEST FOR PID = %d\n", proc->pid);
+        cprintf("priority old: %d, budget old = %d\n", proc->priority, proc->budget);
         proc->budget = BUDGET_NEW;
         if(proc->priority < MAX)
             proc->priority = proc->priority + 1;
+
+        cprintf("priority new: %d, budget new = %d\n", proc->priority, proc->budget);
+        procdump();
     }
-/*    if(p->budget <= 0)
-    {
-        p->budget = BUDGET_NEW;
-        if(p->priority < MAX)
-        {
-            if(removeFromStateList(&ptable.pLists.ready[p->priority], p) == 0)
-                panic("CHECK FOR DEMOTION REMOVE");
-            assertState(p, RUNNABLE);
-            p->priority = p->priority + 1;
-            if(addToStateListEnd(&ptable.pLists.ready[p->priority], p) == 0)
-                panic("CHECK FOR DEMOTION ADD");
-        }
-    }
-*/
     return -1; 
+}
+
+void 
+bumpPriority(struct proc * sList)
+{
+    if(!sList) return;
+
+    struct proc *current = sList;
+
+    while(current)
+    {
+        if (current->priority > 0)
+        {           
+/*            cprintf("BUMP PRIORITY TEST FOR PID = %d\n", current->pid);
+            if(current->state == RUNNING)
+                cprintf("testing running process\n");
+            if(current->state == SLEEPING)
+                cprintf("testing sleeping process\n");*/
+            cprintf("priority old = %d\n", current->priority);
+            --current->priority;        
+            current->budget = BUDGET_NEW;
+//            cprintf("priority new = %d\n", current->priority);
+        }
+        current = current->next;
+    }
 }
 #endif
 

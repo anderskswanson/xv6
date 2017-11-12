@@ -24,7 +24,7 @@ countForever(int i)
   }
 
   while (1) {
-    count++;
+    count++;    
     if ((count & (0x1FFFFFFF)) == 0) {
       p = (p+1) % PrioCount;
       rc = setpriority(j, p);
