@@ -53,6 +53,7 @@ static int waitSearch(struct proc * sList);
 static void ctrlprint(struct proc * sList);
 static int checkForDemotion(struct proc *);
 static void bumpPriority(struct proc * sList);
+static int findProcSetPrio(uint pid, struct proc * sList, uint prio);
 #endif
 void
 pinit(void)
@@ -473,10 +474,9 @@ wait(void)
       p = p->next;
     }
 
-    //
     if(havekids == 0)
     {
-        for(int i = 0; i < MAX; ++i)
+        for(int i = 0; i <= MAX; ++i)
         {
             havekids = waitSearch(ptable.pLists.ready[i]);
             if(havekids == 1) break;
@@ -585,6 +585,8 @@ scheduler(void)
                 assertState(found, RUNNABLE);
                 
 //              cprintf("BUMPING PRIORITY IN SCHEDLER\n");
+                if(found->priority != i)
+                    panic("PRIORITY WRONG IN SCHEDULER");
 
                 found->priority = found->priority - 1;
                 found->budget = BUDGET_NEW;
@@ -1001,7 +1003,8 @@ tickasfloat(uint tickcount)
 
 }
 
-int getprocdata(uint max, struct uproc *utable)
+int 
+getprocdata(uint max, struct uproc *utable)
 {
     int i = 0;
     struct proc * p;
@@ -1266,19 +1269,19 @@ checkForDemotion(struct proc * p)
 {
     if(!p) return 0;        
 
-
     proc->budget = proc->budget - (ticks - proc->cpu_ticks_in);
     if(proc->budget <= 0)
     {
-        procdump();
+/*        procdump();
         cprintf("DEMOTION TEST FOR PID = %d\n", proc->pid);
         cprintf("priority old: %d, budget old = %d\n", proc->priority, proc->budget);
+*/        
         proc->budget = BUDGET_NEW;
         if(proc->priority < MAX)
             proc->priority = proc->priority + 1;
 
-        cprintf("priority new: %d, budget new = %d\n", proc->priority, proc->budget);
-        procdump();
+//        cprintf("priority new: %d, budget new = %d\n", proc->priority, proc->budget);
+//        procdump();
     }
     return -1; 
 }
@@ -1289,7 +1292,6 @@ bumpPriority(struct proc * sList)
     if(!sList) return;
 
     struct proc *current = sList;
-
     while(current)
     {
         if (current->priority > 0)
@@ -1297,9 +1299,10 @@ bumpPriority(struct proc * sList)
 /*            cprintf("BUMP PRIORITY TEST FOR PID = %d\n", current->pid);
             if(current->state == RUNNING)
                 cprintf("testing running process\n");
-            if(current->state == SLEEPING)
-                cprintf("testing sleeping process\n");*/
+*/          if(current->state == SLEEPING)
+                cprintf("testing sleeping process\n");
             cprintf("priority old = %d\n", current->priority);
+            
             --current->priority;        
             current->budget = BUDGET_NEW;
 //            cprintf("priority new = %d\n", current->priority);
@@ -1307,6 +1310,70 @@ bumpPriority(struct proc * sList)
         current = current->next;
     }
 }
+
+static int
+findProcSetPrio(uint pid, struct proc * sList, uint prio)
+{
+    struct proc * curr = sList;
+
+    while(curr)
+    {
+        if(curr->pid == pid)
+        {
+            curr->priority = prio;
+            return -1;
+        }
+        curr = curr->next;
+    }
+
+    return 0;
+}
+
+int
+setprocpriority(uint pid, uint prio)
+{
+    struct proc * curr;
+    //first we gotta find that proc
+    if(findProcSetPrio(pid, ptable.pLists.running, prio) == -1)
+        return 0;
+    if(findProcSetPrio(pid, ptable.pLists.sleep, prio) == -1)
+        return 0;
+
+    for(int i = 0; i <= MAX; ++i)
+    {
+        curr = ptable.pLists.ready[i];
+        while(curr)
+        {
+            if(curr->pid == pid)
+            {   
+                if(!holding(&ptable.lock))
+                    acquire(&ptable.lock);
+                printready();
+                if(curr->priority != prio)
+                {
+                    cprintf("SETTING READY PROCESS PRIORITY\n");
+                    if(removeFromStateList(&ptable.pLists.ready[i], curr) == 0)
+                        panic("FAILED REMOVE SET PRIORITY");
+                    assertState(curr, RUNNABLE);
+                    if(addToStateListEnd(&ptable.pLists.ready[prio], curr) == 0)
+                            panic("FAILED ADD IN SET PRIORITY");
+                }
+                if(curr->priority != i)
+                    panic("PRIORITY WRONG IN SET PRIORITY");
+                curr->priority = prio;
+                curr->budget = BUDGET_NEW;
+                printready();
+                if(holding(&ptable.lock))
+                    release(&ptable.lock);
+                return 0;
+            }
+            curr = curr->next;
+        }
+    }
+
+    return -1; //whoops, no proc found!
+}
+
 #endif
 
 

@@ -175,9 +175,7 @@ sys_setpriority(void)
     if(pid < 1) //valid pid
         return -1;
 
-    proc->priority = priority;
-
-    return 0;
+    return setprocpriority(pid, priority);
 }
 #endif
 

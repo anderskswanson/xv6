@@ -129,6 +129,7 @@ void            printsleep(void);
 void            printfree(void);
 void            printzombie(void);
 void            printready(void);
+int             setprocpriority(uint pid, uint prio);
 #endif
 // swtch.S
 void            swtch(struct context**, struct context*);

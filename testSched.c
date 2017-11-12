@@ -49,6 +49,7 @@ main(void)
       countForever(i);
     }
   }
+
   // what the heck, let's have the parent waste time as well!
   countForever(1);
   exit();
