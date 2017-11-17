@@ -47,6 +47,29 @@ testsetpriority(void)
         printf(1, "failed setting prio of pid = 1 to %d\n", negval);
   
 */
+    int pid = getpid();
+    printf(1, "parent: %d\n", pid);
+
+
+    for(int i = 0; i < 10; ++i)
+    {
+      
+
+        if(!fork())
+            while(1) {
+                setpriority(pid, 5);
+                sleep(10000);
+            }
+        else
+        {
+            if(!fork())
+                while(1) {}
+            sleep(10000);
+        }
+    }
+
+   
+
 
     exit();
 }

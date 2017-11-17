@@ -1296,16 +1296,8 @@ bumpPriority(struct proc * sList)
     {
         if (current->priority > 0)
         {           
-/*            cprintf("BUMP PRIORITY TEST FOR PID = %d\n", current->pid);
-            if(current->state == RUNNING)
-                cprintf("testing running process\n");
-*/          if(current->state == SLEEPING)
-                cprintf("testing sleeping process\n");
-            cprintf("priority old = %d\n", current->priority);
-            
             --current->priority;        
             current->budget = BUDGET_NEW;
-//            cprintf("priority new = %d\n", current->priority);
         }
         current = current->next;
     }
@@ -1348,10 +1340,10 @@ setprocpriority(uint pid, uint prio)
             {   
                 if(!holding(&ptable.lock))
                     acquire(&ptable.lock);
-                printready();
+//                printready();
                 if(curr->priority != prio)
                 {
-                    cprintf("SETTING READY PROCESS PRIORITY\n");
+//                    cprintf("SETTING READY PROCESS PRIORITY\n");
                     if(removeFromStateList(&ptable.pLists.ready[i], curr) == 0)
                         panic("FAILED REMOVE SET PRIORITY");
                     assertState(curr, RUNNABLE);
@@ -1362,7 +1354,7 @@ setprocpriority(uint pid, uint prio)
                     panic("PRIORITY WRONG IN SET PRIORITY");
                 curr->priority = prio;
                 curr->budget = BUDGET_NEW;
-                printready();
+  //              printready();
                 if(holding(&ptable.lock))
                     release(&ptable.lock);
                 return 0;
