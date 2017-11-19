@@ -14,6 +14,52 @@
 #include "file.h"
 #include "fcntl.h"
 
+#ifdef CS333_P5
+int
+sys_chmod(void)
+{
+    char * pathname;
+    int n;
+
+    if(argint(0, &n) < 0)
+        return - 1;
+    if(argptr(0, (void*)&pathname, sizeof(pathname)) < 0)
+        return -1;
+    //set permission bits for target specified by pathname
+
+    return 0;
+}
+
+int
+sys_chown(void)
+{
+    char * pathname;
+    int n;
+    
+    if(argint(0, &n) < 0)
+        return - 1;
+    if(argptr(0, (void*)&pathname, sizeof(pathname)) < 0)
+        return -1;
+    //set uid for target specified by pathname
+
+    return 0;
+}
+
+int
+sys_chgrp(void)
+{
+    char * pathname;
+    int n;
+    if(argint(0, &n) < 0)
+        return - 1;
+    if(argptr(0, (void*)&pathname, sizeof(pathname)) < 0)
+        return -1;
+    //set gid for target specified by pathname
+
+    return 0;
+}
+#endif
+
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
 static int

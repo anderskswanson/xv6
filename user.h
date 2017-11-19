@@ -47,6 +47,11 @@ int sleeptest(void);
 int killtest(void);
 int setpriority(int pid, int priority);
 #endif
+#ifdef CS333_P5
+int chmod(char*, int);
+int chown(char*, int);
+int chgrp(char*, int);
+#endif
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);

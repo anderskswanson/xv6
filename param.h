@@ -12,8 +12,11 @@
 #define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
 // #define FSSIZE       1000  // size of file system in blocks
 #define FSSIZE       2000  // size of file system in blocks  // CS333 requires a larger FS.
-#define DEF_UID      0 //default uid
-#define DEF_GID      0 //default gid
+#define DEF_UID      0    //default uid for a process
+#define DEF_GID      0    //default gid for a process
 #define TIME_TO_PROMOTE 2000
 #define MAX          6
 #define BUDGET_NEW   500
+#define DEFAULT_UID  0    //default uid for file system permissions
+#define DEFAULT_GID  0    //default gid for file system permissions
+#define DEFAULT_MODE 00775 //default mode for file

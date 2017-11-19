@@ -8,6 +8,23 @@ struct file {
   uint off;
 };
 
+#ifdef CS333_P5
+union stat_mode_t {
+    struct {
+        uint o_x : 1;
+        uint o_w : 1;
+        uint o_r : 1;
+        uint g_x : 1;
+        uint g_w : 1;
+        uint g_r : 1;
+        uint u_x : 1;
+        uint u_w : 1;
+        uint u_r : 1;
+        uint     : 22;
+    } flags; 
+    uint asInt;
+};
+#endif
 
 // in-memory copy of an inode
 struct inode {
@@ -20,6 +37,11 @@ struct inode {
   short major;
   short minor;
   short nlink;
+#ifdef CS333_P5
+  ushort uid;
+  ushort gid;
+  union stat_mode_t mode;
+#endif
   uint size;
   uint addrs[NDIRECT+1];
 };
