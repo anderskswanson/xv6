@@ -17,13 +17,25 @@ exec(char *path, char **argv)
   struct inode *ip;
   struct proghdr ph;
   pde_t *pgdir, *oldpgdir;
+#ifdef CS333_P5
+  int ipuid;
+#endif
 
   begin_op();
   if((ip = namei(path)) == 0){
     end_op();
     return -1;
   }
+  
   ilock(ip);
+#ifdef CS333_P5
+  ipuid = checksetuid(ip);
+  if(!fscheckperms(ip, proc->uid, proc->gid))
+  {
+      iunlockput(ip);
+      return -1;
+  }
+#endif
   pgdir = 0;
 
   // Check ELF header
@@ -92,6 +104,10 @@ exec(char *path, char **argv)
   proc->sz = sz;
   proc->tf->eip = elf.entry;  // main
   proc->tf->esp = sp;
+#ifdef CS333_P5
+  if(ipuid != -1)
+      proc->uid = ipuid;
+#endif
   switchuvm(proc);
   freevm(oldpgdir);
   return 0;

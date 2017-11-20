@@ -19,4 +19,4 @@
 #define BUDGET_NEW   500
 #define DEFAULT_UID  0    //default uid for file system permissions
 #define DEFAULT_GID  0    //default gid for file system permissions
-#define DEFAULT_MODE 00775 //default mode for file
+#define DEFAULT_MODE 0775 //default mode for file

@@ -21,13 +21,17 @@ sys_chmod(void)
     char * pathname;
     int n;
 
-    if(argint(0, &n) < 0)
+    if(argint(1, &n) < 0)
         return - 1;
     if(argptr(0, (void*)&pathname, sizeof(pathname)) < 0)
         return -1;
-    //set permission bits for target specified by pathname
 
-    return 0;
+    //if val out of range
+    if(n < 01 || n > 01777 || !pathname)
+        return -1;
+
+    //set permission bits for target specified by pathname
+    return fschmod(pathname, n);
 }
 
 int
@@ -36,13 +40,15 @@ sys_chown(void)
     char * pathname;
     int n;
     
-    if(argint(0, &n) < 0)
+    if(argint(1, &n) < 0)
         return - 1;
     if(argptr(0, (void*)&pathname, sizeof(pathname)) < 0)
         return -1;
-    //set uid for target specified by pathname
+    if(n < 1 || !pathname)
+        return -1;
 
-    return 0;
+    //set uid for target specified by pathname
+    return fschown(pathname, n);
 }
 
 int
@@ -50,13 +56,16 @@ sys_chgrp(void)
 {
     char * pathname;
     int n;
-    if(argint(0, &n) < 0)
+    if(argint(1, &n) < 0)
         return - 1;
     if(argptr(0, (void*)&pathname, sizeof(pathname)) < 0)
         return -1;
-    //set gid for target specified by pathname
 
-    return 0;
+    if(n < 1 || !pathname)
+        return -1;
+
+    //set gid for target specified by pathname
+    return fschgrp(pathname, n);
 }
 #endif
 

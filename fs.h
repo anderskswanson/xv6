@@ -40,6 +40,7 @@ union mode_t {
         uint u_x : 1;
         uint u_w : 1;
         uint u_r : 1;
+        uint setuid : 1;
         uint     : 22;
     } flags; 
     uint asInt;

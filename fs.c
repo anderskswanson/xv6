@@ -24,6 +24,74 @@
 static void itrunc(struct inode*);
 struct superblock sb;   // there should be one per dev, but we run with one dev
 
+#ifdef CS333_P5
+//System call implementations for chown, chmod, chgrp
+int
+fschmod(char * pathname, int mode)
+{
+    struct inode* node = namei(pathname);
+    if(!node) return -1;
+
+    ilock(node);
+    node->mode.asInt = mode;
+    iunlock(node);
+
+    return 0;
+}
+
+int 
+fschown(char * pathname, int owner)
+{
+    struct inode* node = namei(pathname);
+    if(!node) return -1;
+
+    ilock(node);
+    node->uid = owner;
+    iunlock(node);
+
+    return 0;
+}
+
+int 
+fschgrp(char * pathname, int group)
+{
+    struct inode* node = namei(pathname);
+    if(!node) return -1;
+    
+    ilock(node);
+    node->gid = group;
+    iunlock(node);
+
+    return 0;
+}
+
+int 
+checksetuid(struct inode* ip)
+{
+    if(!ip) return -1;
+
+    if(ip->mode.flags.setuid == 1)
+        return ip->uid;
+    else
+        return -1;
+}
+
+int
+fscheckperms(struct inode* ip, uint uid, uint gid)
+{
+    if(!ip) return 0;
+
+    if(ip->uid == uid && ip->mode.flags.u_x != 0)
+        return 1;
+    if(ip->gid == gid && ip->mode.flags.g_x != 0)
+        return 1;
+    if(ip->mode.flags.o_x == 1)
+        return 1;
+
+    return 0;
+}
+#endif
+
 // Read the super block.
 void
 readsb(int dev, struct superblock *sb)
@@ -435,11 +503,16 @@ itrunc(struct inode *ip)
 void
 stati(struct inode *ip, struct stat *st)
 {
-  st->dev = ip->dev;
-  st->ino = ip->inum;
-  st->type = ip->type;
+  st->dev   = ip->dev;
+  st->ino   = ip->inum;
+  st->type  = ip->type;
   st->nlink = ip->nlink;
-  st->size = ip->size;
+  st->size  = ip->size;
+#ifdef CS333_P5
+  st->uid   = ip->uid;
+  st->gid   = ip->gid;
+  st->mode.asInt  = ip->mode.asInt;
+#endif
 }
 
 // Read data from inode.
