@@ -27,7 +27,7 @@ sys_chmod(void)
         return -1;
 
     //if val out of range
-    if(n < 01 || n > 01777 || !pathname)
+    if(n < 01 || n > 010000 || !pathname)
         return -1;
 
     //set permission bits for target specified by pathname

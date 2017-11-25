@@ -4,10 +4,12 @@
 int
 main(int argc, char * argv[])
 {
-  if(argc != 3) 
+  if(argc != 3) { 
       printf(1, "Error: Wrong number of arguments\n");
+      exit();
+  }
 
-  if(!chmod(argv[1], atoi(argv[2])))
+  if(chmod(argv[2], atoi(argv[1])) == -1)
       printf(1, "chmod failed\n");
   exit();
 }
