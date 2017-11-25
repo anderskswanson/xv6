@@ -27,7 +27,7 @@ sys_chmod(void)
         return -1;
 
     //if val out of range
-    if(n < 01 || n > 010000 || !pathname)
+    if(n < 0 || n > 1023  || !pathname)
         return -1;
 
     //set permission bits for target specified by pathname
@@ -44,7 +44,7 @@ sys_chown(void)
         return - 1;
     if(argptr(0, (void*)&pathname, sizeof(pathname)) < 0)
         return -1;
-    if(n < 1 || !pathname)
+    if(n < 1 || n > 32768 || !pathname)
         return -1;
 
     //set uid for target specified by pathname
@@ -61,7 +61,7 @@ sys_chgrp(void)
     if(argptr(0, (void*)&pathname, sizeof(pathname)) < 0)
         return -1;
 
-    if(n < 1 || !pathname)
+    if(n < 1 || n > 32768 || !pathname)
         return -1;
 
     //set gid for target specified by pathname

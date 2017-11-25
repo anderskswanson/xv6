@@ -32,9 +32,12 @@ fschmod(char * pathname, int mode)
     struct inode* node = namei(pathname);
     if(!node) return -1;
 
+    begin_op();
     ilock(node);
     node->mode.asInt = mode;
+    iupdate(node);
     iunlock(node);
+    end_op();
 
     return 0;
 }
@@ -45,9 +48,12 @@ fschown(char * pathname, int owner)
     struct inode* node = namei(pathname);
     if(!node) return -1;
 
+    begin_op();
     ilock(node);
     node->uid = owner;
+    iupdate(node);
     iunlock(node);
+    end_op();
 
     return 0;
 }
@@ -58,9 +64,12 @@ fschgrp(char * pathname, int group)
     struct inode* node = namei(pathname);
     if(!node) return -1;
     
+    begin_op();
     ilock(node);
     node->gid = group;
+    iupdate(node);
     iunlock(node);
+    end_op();
 
     return 0;
 }

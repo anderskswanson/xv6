@@ -32,7 +32,10 @@ exec(char *path, char **argv)
   ipuid = checksetuid(ip);
   if(!fscheckperms(ip, proc->uid, proc->gid))
   {
-      iunlockput(ip);
+      if(ip){
+        iunlockput(ip);
+        end_op();
+      }
       return -1;
   }
 #endif
