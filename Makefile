@@ -250,7 +250,7 @@ qemu-nox: fs.img xv6.img
 	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
 
 qemu-nox-gdb: fs.img xv6.img .gdbinit 
-	@echo "*** Now run 'gdb'." 1>&2
+	@echo "*** Now run 'gdb'. $(QEMUGDB)" 1>&2
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
 
 EXTRA=\
