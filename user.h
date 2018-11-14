@@ -41,7 +41,17 @@ int setgid(uint); //set GID
 int testuidgid(void); //test of gid and uid system calls
 int getprocs(uint max, struct uproc * table); //populate uproc table with proc data
 #endif
-
+#ifdef CS333_P3P4
+int deathtest(void);
+int sleeptest(void);
+int killtest(void);
+int setpriority(int pid, int priority);
+#endif
+#ifdef CS333_P5
+int chmod(char*, int);
+int chown(char*, int);
+int chgrp(char*, int);
+#endif
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);

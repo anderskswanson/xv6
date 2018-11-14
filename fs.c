@@ -24,6 +24,83 @@
 static void itrunc(struct inode*);
 struct superblock sb;   // there should be one per dev, but we run with one dev
 
+#ifdef CS333_P5
+//System call implementations for chown, chmod, chgrp
+int
+fschmod(char * pathname, int mode)
+{
+    struct inode* node = namei(pathname);
+    if(!node) return -1;
+
+    begin_op();
+    ilock(node);
+    node->mode.asInt = mode;
+    iupdate(node);
+    iunlock(node);
+    end_op();
+
+    return 0;
+}
+
+int 
+fschown(char * pathname, int owner)
+{
+    struct inode* node = namei(pathname);
+    if(!node) return -1;
+
+    begin_op();
+    ilock(node);
+    node->uid = owner;
+    iupdate(node);
+    iunlock(node);
+    end_op();
+
+    return 0;
+}
+
+int 
+fschgrp(char * pathname, int group)
+{
+    struct inode* node = namei(pathname);
+    if(!node) return -1;
+    
+    begin_op();
+    ilock(node);
+    node->gid = group;
+    iupdate(node);
+    iunlock(node);
+    end_op();
+
+    return 0;
+}
+
+int 
+checksetuid(struct inode* ip)
+{
+    if(!ip) return -1;
+
+    if(ip->mode.flags.setuid == 1)
+        return ip->uid;
+    else
+        return -1;
+}
+
+int
+fscheckperms(struct inode* ip, uint uid, uint gid)
+{
+    if(!ip) return 0;
+
+    if(ip->uid == uid && ip->mode.flags.u_x != 0)
+        return 1;
+    if(ip->gid == gid && ip->mode.flags.g_x != 0)
+        return 1;
+    if(ip->mode.flags.o_x == 1)
+        return 1;
+
+    return 0;
+}
+#endif
+
 // Read the super block.
 void
 readsb(int dev, struct superblock *sb)
@@ -187,6 +264,11 @@ ialloc(uint dev, short type)
       dip->type = type;
       log_write(bp);   // mark it allocated on the disk
       brelse(bp);
+#ifdef CS333_P5
+      dip->uid = DEFAULT_UID;
+      dip->gid = DEFAULT_UID;
+      dip->mode.asInt = DEFAULT_MODE;
+#endif
       return iget(dev, inum);
     }
     brelse(bp);
@@ -208,6 +290,11 @@ iupdate(struct inode *ip)
   dip->minor = ip->minor;
   dip->nlink = ip->nlink;
   dip->size = ip->size;
+#ifdef CS333_P5
+  dip->uid = ip->uid;
+  dip->gid = ip->gid;
+  dip->mode.asInt = ip->mode.asInt;
+#endif
   memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
   log_write(bp);
   brelse(bp);
@@ -285,6 +372,11 @@ ilock(struct inode *ip)
     ip->minor = dip->minor;
     ip->nlink = dip->nlink;
     ip->size = dip->size;
+#ifdef CS333_P5
+    ip->uid = dip->uid;
+    ip->gid = dip->gid;
+    ip->mode.asInt = dip->mode.asInt;
+#endif
     memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
     brelse(bp);
     ip->flags |= I_VALID;
@@ -420,11 +512,16 @@ itrunc(struct inode *ip)
 void
 stati(struct inode *ip, struct stat *st)
 {
-  st->dev = ip->dev;
-  st->ino = ip->inum;
-  st->type = ip->type;
+  st->dev   = ip->dev;
+  st->ino   = ip->inum;
+  st->type  = ip->type;
   st->nlink = ip->nlink;
-  st->size = ip->size;
+  st->size  = ip->size;
+#ifdef CS333_P5
+  st->uid   = ip->uid;
+  st->gid   = ip->gid;
+  st->mode.asInt  = ip->mode.asInt;
+#endif
 }
 
 // Read data from inode.
